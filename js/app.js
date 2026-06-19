@@ -916,34 +916,27 @@ function renderPayments() {
     return;
   }
 
-  list.innerHTML = `<div style="overflow-x:auto;">
-    <table class="pay-table">
-      <thead><tr>
-        <th style="width:36px;">#</th>
-        <th>단계명</th>
-        <th style="text-align:right">예상금액(만)</th>
-        <th>예정일</th>
-        <th style="text-align:right">입금액(만)</th>
-        <th>입금일</th>
-        <th>비고</th>
-        <th>상태</th>
-        <th style="width:36px;"></th>
-      </tr></thead>
-      <tbody>
-        ${_payments.map((r, i) => `<tr>
-          <td style="color:var(--text2);text-align:center;">${i+1}</td>
-          <td><input class="pay-input" style="min-width:70px;" value="${esc(r.stage||'')}" onchange="updatePayment(${i},'stage',this.value)"></td>
-          <td><input class="pay-input" type="number" style="min-width:80px;text-align:right;" value="${r.expectedAmount||''}" placeholder="0" onchange="updatePayment(${i},'expectedAmount',this.value)"></td>
-          <td><input class="pay-input" type="date" value="${r.expectedDate||''}" onchange="updatePayment(${i},'expectedDate',this.value)"></td>
-          <td><input class="pay-input" type="number" style="min-width:80px;text-align:right;" value="${r.paidAmount||''}" placeholder="0" onchange="updatePayment(${i},'paidAmount',this.value)"></td>
-          <td><input class="pay-input" type="date" value="${r.paidDate||''}" onchange="updatePayment(${i},'paidDate',this.value)"></td>
-          <td><input class="pay-input" style="min-width:80px;" value="${esc(r.note||'')}" placeholder="메모" onchange="updatePayment(${i},'note',this.value)"></td>
-          <td>${payStatusBadge(r)}</td>
-          <td><span style="cursor:pointer;color:var(--red);font-size:16px;padding:0 4px;" onclick="deletePayment(${i})">×</span></td>
-        </tr>`).join('')}
-      </tbody>
-    </table>
-  </div>`;
+  list.innerHTML = _payments.map((r, i) => `
+    <div style="border:0.5px solid var(--border);border-radius:var(--r);padding:8px 10px;margin-bottom:6px;background:var(--bg);">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="font-size:11px;color:var(--text2);min-width:16px;">${i+1}</span>
+        <input class="pay-input" style="flex:1;" placeholder="단계명" value="${esc(r.stage||'')}" onchange="updatePayment(${i},'stage',this.value)">
+        ${payStatusBadge(r)}
+        <span style="cursor:pointer;color:var(--red);font-size:16px;line-height:1;padding:0 2px;" onclick="deletePayment(${i})">×</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">예상금액(만)</div>
+          <input class="pay-input" type="number" placeholder="0" value="${r.expectedAmount||''}" onchange="updatePayment(${i},'expectedAmount',this.value)"></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">예정일</div>
+          <input class="pay-input" type="date" value="${r.expectedDate||''}" onchange="updatePayment(${i},'expectedDate',this.value)"></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">입금액(만)</div>
+          <input class="pay-input" type="number" placeholder="0" value="${r.paidAmount||''}" onchange="updatePayment(${i},'paidAmount',this.value)"></div>
+        <div><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">입금일</div>
+          <input class="pay-input" type="date" value="${r.paidDate||''}" onchange="updatePayment(${i},'paidDate',this.value)"></div>
+        <div style="grid-column:1/-1;"><div style="font-size:11px;color:var(--text2);margin-bottom:2px;">비고</div>
+          <input class="pay-input" placeholder="메모" value="${esc(r.note||'')}" onchange="updatePayment(${i},'note',this.value)"></div>
+      </div>
+    </div>`).join('');
 }
 
 function updatePayment(idx, field, value) {
