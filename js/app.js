@@ -442,7 +442,7 @@ function openNewDrawer(){
   renderProcessTimeline([]);
   renderAttachments([]);
   renderNextAction(null);
-  initPayments([]);
+  initPayments([{ id:'pay_'+Date.now(), stage:'1단계', expectedAmount:0, expectedDate:'', paidAmount:0, paidDate:'', note:'' }]);
   renderPayments();
   switchTab('basic',document.querySelector('.d-tab'));
   document.getElementById('drawerOverlay').classList.add('open');
@@ -874,7 +874,6 @@ function initDragRows(tbody){
 /* ── 수금 관리 ── */
 let _payments = [];
 
-const DEFAULT_PAYMENT_STAGES = ['계약금','중도금','잔금'];
 
 function initPayments(payments) {
   _payments = payments ? JSON.parse(JSON.stringify(payments)) : [];
@@ -913,10 +912,7 @@ function renderPayments() {
   }
 
   if (_payments.length === 0) {
-    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text2);font-size:13px;">수금 단계가 없습니다.<br>기본 3단계(계약금·중도금·잔금)를 추가하거나 단계를 직접 입력하세요.</div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;">
-        <button class="btn-sm-primary" onclick="addDefaultPaymentStages()">기본 3단계 추가</button>
-      </div>`;
+    list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px;">+ 추가 버튼으로 수금 단계를 등록하세요.</div>`;
     return;
   }
 
@@ -984,12 +980,6 @@ function addPaymentStage() {
   renderPayments();
 }
 
-function addDefaultPaymentStages() {
-  DEFAULT_PAYMENT_STAGES.forEach(name => {
-    _payments.push({ id:'pay_'+Date.now()+'_'+name, stage:name, expectedAmount:0, expectedDate:'', paidAmount:0, paidDate:'', note:'' });
-  });
-  renderPayments();
-}
 
 function deletePayment(idx) {
   _payments.splice(idx, 1);
@@ -1018,5 +1008,5 @@ Object.assign(window,{
   calcProfit,
   toggleProcessForm,clearProcessForm,saveProcessEntry,editProcessEntry,deleteProcessEntry,
   addDemoFile,removeFile,saveNextAction,saveSite,deleteSite,exportData,
-  addPaymentStage,addDefaultPaymentStages,deletePayment,updatePayment,
+  addPaymentStage,deletePayment,updatePayment,
 });
