@@ -510,6 +510,7 @@ function setStage(s){
   if(currentSiteId){
     document.getElementById('drawerStageBadge').innerHTML=stageBadge(s);
   }
+  renderPaymentSummary();
 }
 
 /* ── TAB ── */
@@ -892,24 +893,29 @@ function payStatusBadge(row) {
   return `<span class="pay-status ${cls}">${label}</span>`;
 }
 
+function _buildPaySummaryHTML() {
+  const contractAmt = parseInt(document.getElementById('f-amount')?.value) || 0;
+  const donePaid = _payments.reduce((a, r) => getPaymentStatus(r) === 'done' ? a + (parseInt(r.paidAmount)||0) : a, 0);
+  const anyDone = _payments.some(r => getPaymentStatus(r) === 'done');
+  const isWon = currentStage === '계약완료';
+  const showFull = isWon || anyDone;
+  const remaining = contractAmt - donePaid;
+
+  let html = `<div class="pay-summary-item"><div class="pay-summary-label">총금액</div><div class="pay-summary-val">${fmt(contractAmt)}</div></div>`;
+  if (showFull) {
+    html += `<div class="pay-summary-item"><div class="pay-summary-label">수금액</div><div class="pay-summary-val paid-amount">${fmt(donePaid)}</div></div>`;
+    html += `<div class="pay-summary-item"><div class="pay-summary-label">미수금액</div><div class="pay-summary-val" style="color:${remaining>0?'var(--amber)':'var(--teal)'};">${fmt(remaining)}</div></div>`;
+  }
+  return html;
+}
+
 function renderPayments() {
   const list = document.getElementById('paymentList');
   const summary = document.getElementById('paymentSummary');
   if (!list) return;
 
-  const totalExpected = _payments.reduce((a, r) => a + (parseInt(r.expectedAmount) || 0), 0);
-  const totalPaid = _payments.reduce((a, r) => a + (parseInt(r.paidAmount) || 0), 0);
-
-  if (_payments.length > 0) {
-    summary.style.display = 'flex';
-    summary.innerHTML =
-      `<div class="pay-summary-item"><div class="pay-summary-label">수금 단계</div><div class="pay-summary-val">${_payments.length}단계</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">총 예상 수금액</div><div class="pay-summary-val">${fmt(totalExpected)}</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">실제 입금액</div><div class="pay-summary-val paid-amount">${fmt(totalPaid)}</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">미수금</div><div class="pay-summary-val" style="color:${totalExpected-totalPaid>0?'var(--amber)':'var(--teal)'};">${fmt(totalExpected-totalPaid)}</div></div>`;
-  } else {
-    summary.style.display = 'none';
-  }
+  summary.style.display = 'flex';
+  summary.innerHTML = _buildPaySummaryHTML();
 
   if (_payments.length === 0) {
     list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px;">+ 추가 버튼으로 수금 단계를 등록하세요.</div>`;
@@ -956,16 +962,8 @@ function updatePayment(idx, field, value) {
 function renderPaymentSummary() {
   const summary = document.getElementById('paymentSummary');
   if (!summary) return;
-  const totalExpected = _payments.reduce((a, r) => a + (parseInt(r.expectedAmount) || 0), 0);
-  const totalPaid = _payments.reduce((a, r) => a + (parseInt(r.paidAmount) || 0), 0);
-  if (_payments.length > 0) {
-    summary.style.display = 'flex';
-    summary.innerHTML =
-      `<div class="pay-summary-item"><div class="pay-summary-label">수금 단계</div><div class="pay-summary-val">${_payments.length}단계</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">총 예상 수금액</div><div class="pay-summary-val">${fmt(totalExpected)}</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">실제 입금액</div><div class="pay-summary-val paid-amount">${fmt(totalPaid)}</div></div>`+
-      `<div class="pay-summary-item"><div class="pay-summary-label">미수금</div><div class="pay-summary-val" style="color:${totalExpected-totalPaid>0?'var(--amber)':'var(--teal)'};">${fmt(totalExpected-totalPaid)}</div></div>`;
-  }
+  summary.style.display = 'flex';
+  summary.innerHTML = _buildPaySummaryHTML();
 }
 
 function addPaymentStage() {
