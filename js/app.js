@@ -901,9 +901,9 @@ function _buildPaySummaryHTML() {
   const showFull = isWon || anyDone;
   const remaining = contractAmt - donePaid;
 
-  let html = `<div class="pay-summary-item"><div class="pay-summary-label">총금액</div><div class="pay-summary-val">${fmt(contractAmt)}</div></div>`;
+  let html = `<div class="pay-summary-item"><div class="pay-summary-label">계약금액</div><div class="pay-summary-val">${fmt(contractAmt)}</div></div>`;
   if (showFull) {
-    html += `<div class="pay-summary-item"><div class="pay-summary-label">수금액</div><div class="pay-summary-val paid-amount">${fmt(donePaid)}</div></div>`;
+    html += `<div class="pay-summary-item"><div class="pay-summary-label">입금액</div><div class="pay-summary-val paid-amount">${fmt(donePaid)}</div></div>`;
     html += `<div class="pay-summary-item"><div class="pay-summary-label">미수금액</div><div class="pay-summary-val" style="color:${remaining>0?'var(--amber)':'var(--teal)'};">${fmt(remaining)}</div></div>`;
   }
   return html;
