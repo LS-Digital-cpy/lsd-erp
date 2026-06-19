@@ -555,7 +555,6 @@ select.p-form-input { cursor: pointer; }
   <div class="drawer-tabs">
     <div class="d-tab active" onclick="switchTab('basic',this)">기본 정보</div>
     <div class="d-tab" onclick="switchTab('process',this)">진행 과정</div>
-    <div class="d-tab" onclick="switchTab('payment',this)">수금</div>
     <div class="d-tab" onclick="switchTab('files',this)">첨부 파일</div>
     <div class="d-tab" onclick="switchTab('next',this)">다음 액션</div>
   </div>
@@ -602,6 +601,14 @@ select.p-form-input { cursor: pointer; }
           <div class="form-group"><div class="form-label">이메일</div><input class="form-input" id="f-cemail" type="email" placeholder="email@example.com"></div>
           <div class="form-group"><div class="form-label">전화번호</div><input class="form-input" id="f-ctel" placeholder="010-0000-0000"></div>
         </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>수금 관리</span>
+          <button class="btn-sm-primary" onclick="addPaymentStage()">+ 단계 추가</button>
+        </div>
+        <div id="paymentSummary" style="background:var(--bg2);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;display:none;gap:24px;font-size:13px;flex-wrap:wrap;"></div>
+        <div id="paymentList"></div>
       </div>
     </div>
 
@@ -674,15 +681,6 @@ select.p-form-input { cursor: pointer; }
     </div>
 
     <!-- 다음 액션 탭 -->
-    <div class="tab-panel" id="tab-payment">
-      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="font-size:13px;color:var(--text2);">수금 단계를 등록하고 실제 입금 내역을 관리합니다.</div>
-        <button class="btn-sm-primary" onclick="addPaymentStage()">+ 단계 추가</button>
-      </div>
-      <div id="paymentSummary" style="display:none;background:var(--bg2);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;display:flex;gap:24px;font-size:13px;"></div>
-      <div id="paymentList"></div>
-    </div>
-
     <div class="tab-panel" id="tab-next">
       <div class="form-section">
         <div class="form-section-title">다음 액션 등록</div>
