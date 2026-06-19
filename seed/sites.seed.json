@@ -1,0 +1,116 @@
+{
+  "_comment": "Design Ref: §3.3, §4.3, §8.5 — bkend.ai 'sites' 컬렉션 초기 데이터 (기존 lsd_sales_management_v2.html sites[] 9건 마이그레이션). 최초 관리자(u1, 영업팀장) 1명만 bkend Auth + profiles에 직접 생성하고, sites의 managerId를 u1의 실제 user/profile id로 교체하세요. 나머지 담당자(이세일/박계약/최분석)는 관리자가 로그인 후 '사용자 관리' 화면에서 등록하고, 발급된 id로 해당 sites의 managerId를 갱신하세요.",
+
+  "users": [
+    { "tempId": "u1", "email": "kim.sales@lsd.co.kr", "password": "ChangeMe123!", "name": "김영업", "role": "영업팀장" }
+  ],
+
+  "sites": [
+    {
+      "site": "행정안전부 ERP 구축", "customer": "행정안전부", "type": "정부기관", "stage": "협상",
+      "product": "ERP 솔루션", "amount": 8500, "managerId": "u1", "managerName": "김영업",
+      "deadline": "2026-05-30", "priority": 3, "prob": 75, "note": "RFP 검토중",
+      "cname": "이철수", "cpos": "정보화담당관", "cemail": "lee@mois.go.kr", "ctel": "02-2100-3000",
+      "nextAction": { "type": "미팅 예약", "date": "2026-04-29", "desc": "최종 가격 협상 미팅 진행", "person": "김영업" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-03-25", "type": "이메일", "title": "제안요청서(RFP) 수령", "desc": "행안부로부터 RFP 공식 수령. 제안 마감 4월 15일.", "stage": "발굴", "attendee": "" },
+        { "id": "p2", "date": "2026-04-10", "type": "미팅", "title": "담당과장 첫 미팅", "desc": "정보화담당관 이철수 과장과 초도 미팅. 예산 8,500만원 확인. 경쟁사 3곳 참여 예상.", "stage": "접촉", "attendee": "김영업,이철수" },
+        { "id": "p3", "date": "2026-04-15", "type": "제안서", "title": "1차 제안서 제출", "desc": "기술제안서 및 가격제안서 제출 완료. 차별화 포인트: 커스터마이징 무상 1년.", "stage": "제안", "attendee": "" },
+        { "id": "p4", "date": "2026-04-20", "type": "미팅", "title": "PT 발표 및 질의응답", "desc": "PT 20분, Q&A 40분 진행. 유지보수 방안 및 데이터 마이그레이션 추가 설명 요청.", "stage": "협상", "attendee": "김영업,박계약,이철수,김정보" }
+      ]
+    },
+    {
+      "site": "중기부 CRM 도입", "customer": "중소벤처기업부", "type": "정부기관", "stage": "제안",
+      "product": "CRM 솔루션", "amount": 4200, "managerId": "", "managerName": "이세일",
+      "deadline": "2026-06-15", "priority": 3, "prob": 60, "note": "벤더 비교 중",
+      "cname": "박민준", "cpos": "IT혁신과", "cemail": "park@mss.go.kr", "ctel": "02-2100-6000",
+      "nextAction": { "type": "제안서 제출", "date": "2026-05-01", "desc": "수정 제안서 제출 예정", "person": "이세일" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-01", "type": "미팅", "title": "요구사항 수집 미팅", "desc": "IT혁신과 담당자와 CRM 도입 요구사항 파악. 영업/고객지원 통합 필요.", "stage": "접촉", "attendee": "이세일,박민준" },
+        { "id": "p2", "date": "2026-04-15", "type": "데모", "title": "CRM 솔루션 데모 시연", "desc": "현장 데모 진행. 반응 긍정적이나 보안 요건 추가 확인 필요.", "stage": "제안", "attendee": "이세일" }
+      ]
+    },
+    {
+      "site": "테크원 보안 SW 납품", "customer": "(주)테크원", "type": "중소기업", "stage": "계약완료",
+      "product": "보안 SW", "amount": 1800, "managerId": "", "managerName": "박계약",
+      "deadline": "2026-04-10", "priority": 2, "prob": 100, "note": "계약 완료",
+      "cname": "김대표", "cpos": "대표이사", "cemail": "ceo@techone.co.kr", "ctel": "010-1234-5678",
+      "nextAction": null,
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-03-01", "type": "미팅", "title": "초도 미팅 및 요구사항 파악", "desc": "보안 SW 도입 필요성 확인. 예산 2,000만원 이하 요청.", "stage": "접촉", "attendee": "박계약,김대표" },
+        { "id": "p2", "date": "2026-03-15", "type": "견적", "title": "견적서 제출", "desc": "1,900만원 견적 제출.", "stage": "제안", "attendee": "" },
+        { "id": "p3", "date": "2026-03-30", "type": "미팅", "title": "최종 협상", "desc": "가격 1,800만원으로 최종 합의.", "stage": "협상", "attendee": "박계약,김대표" },
+        { "id": "p4", "date": "2026-04-08", "type": "계약", "title": "계약서 서명", "desc": "정식 계약 완료. 납품 4월 10일.", "stage": "계약완료", "attendee": "박계약,김대표" }
+      ]
+    },
+    {
+      "site": "스마트팩 클라우드", "customer": "스마트팩토리(주)", "type": "중소기업", "stage": "접촉",
+      "product": "클라우드 서비스", "amount": 3600, "managerId": "u1", "managerName": "김영업",
+      "deadline": "2026-07-31", "priority": 2, "prob": 40, "note": "초기 미팅 완료",
+      "cname": "최이사", "cpos": "이사", "cemail": "choi@smartfac.co.kr", "ctel": "010-9876-5432",
+      "nextAction": { "type": "현장 방문", "date": "2026-04-29", "desc": "현장 방문 및 인프라 파악", "person": "김영업" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-22", "type": "미팅", "title": "초기 요구사항 미팅", "desc": "클라우드 전환 검토 중. 기존 온프레미스 서버 5대 운영 중.", "stage": "접촉", "attendee": "김영업,최이사" }
+      ]
+    },
+    {
+      "site": "교육부 IT 컨설팅", "customer": "교육부", "type": "정부기관", "stage": "발굴",
+      "product": "IT 컨설팅", "amount": 2500, "managerId": "", "managerName": "최분석",
+      "deadline": "2026-08-31", "priority": 1, "prob": 25, "note": "내부 검토 중",
+      "cname": "", "cpos": "", "cemail": "", "ctel": "",
+      "nextAction": null,
+      "attachments": [],
+      "process": []
+    },
+    {
+      "site": "그린에너지 ERP", "customer": "그린에너지(주)", "type": "중소기업", "stage": "제안",
+      "product": "ERP 솔루션", "amount": 5200, "managerId": "", "managerName": "이세일",
+      "deadline": "2026-06-30", "priority": 3, "prob": 55, "note": "2차 제안 준비",
+      "cname": "김부장", "cpos": "IT담당부장", "cemail": "kim@greenenergy.co.kr", "ctel": "010-5555-1234",
+      "nextAction": { "type": "제안서 제출", "date": "2026-05-05", "desc": "2차 제안서 제출", "person": "이세일" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-02", "type": "견적", "title": "견적서 제출", "desc": "초기 견적 5,500만원 제출.", "stage": "제안", "attendee": "" },
+        { "id": "p2", "date": "2026-04-18", "type": "미팅", "title": "1차 제안 발표", "desc": "ERP 기능 시연. 가격 경쟁력 보완 요청.", "stage": "제안", "attendee": "이세일,김부장" }
+      ]
+    },
+    {
+      "site": "서울시 유지보수 갱신", "customer": "서울특별시", "type": "정부기관", "stage": "협상",
+      "product": "유지보수", "amount": 1200, "managerId": "", "managerName": "박계약",
+      "deadline": "2026-05-01", "priority": 3, "prob": 85, "note": "계약 갱신 협의",
+      "cname": "정담당", "cpos": "전산팀", "cemail": "jung@seoul.go.kr", "ctel": "02-2133-0000",
+      "nextAction": { "type": "계약서 작성", "date": "2026-05-02", "desc": "갱신 계약서 작성 및 서명", "person": "박계약" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-10", "type": "전화", "title": "갱신 의사 확인", "desc": "담당자 전화 통화. 갱신 의향 있음. 소폭 인상 가능 시사.", "stage": "접촉", "attendee": "박계약" },
+        { "id": "p2", "date": "2026-04-25", "type": "미팅", "title": "계약 조건 협의", "desc": "1,200만원/년으로 합의 임박. 다음주 계약서 서명 예정.", "stage": "협상", "attendee": "박계약,정담당" }
+      ]
+    },
+    {
+      "site": "복지부 보안시스템", "customer": "보건복지부", "type": "정부기관", "stage": "접촉",
+      "product": "보안 SW", "amount": 3800, "managerId": "u1", "managerName": "김영업",
+      "deadline": "2026-07-15", "priority": 2, "prob": 45, "note": "보안 요구사항 파악 중",
+      "cname": "", "cpos": "", "cemail": "", "ctel": "",
+      "nextAction": null,
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-19", "type": "미팅", "title": "실무자 미팅", "desc": "보안 취약점 현황 파악. 요구사항 정리 후 제안서 작성 예정.", "stage": "접촉", "attendee": "김영업" }
+      ]
+    },
+    {
+      "site": "국방부 ERP 유지보수", "customer": "국방부", "type": "정부기관", "stage": "제안",
+      "product": "ERP 솔루션", "amount": 6800, "managerId": "", "managerName": "박계약",
+      "deadline": "2026-06-20", "priority": 3, "prob": 50, "note": "보안 심사 대기",
+      "cname": "", "cpos": "", "cemail": "", "ctel": "",
+      "nextAction": { "type": "전화 연락", "date": "2026-05-10", "desc": "보안 심사 결과 확인", "person": "박계약" },
+      "attachments": [],
+      "process": [
+        { "id": "p1", "date": "2026-04-23", "type": "제안서", "title": "보안 요구사항 제안서 제출", "desc": "국방부 보안 규격에 맞춘 제안서 제출. 보안 심사 소요 2~3주.", "stage": "제안", "attendee": "박계약" }
+      ]
+    }
+  ]
+}

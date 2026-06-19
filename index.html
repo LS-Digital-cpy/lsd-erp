@@ -1,0 +1,735 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue: #185FA5; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+  --teal: #1D9E75; --teal-light: #E1F5EE;
+  --amber: #BA7517; --amber-light: #FAEEDA;
+  --red: #A32D2D; --red-light: #FCEBEB;
+  --green: #3B6D11; --green-light: #EAF3DE;
+  --gray: #5F5E5A; --gray-light: #F1EFE8;
+  --pink-light: #FBEAF0; --pink-dark: #72243E;
+  --border: var(--color-border-tertiary, #E5E3DD);
+  --bg: var(--color-background-primary, #FFFFFF);
+  --bg2: var(--color-background-secondary, #F7F6F3);
+  --bg3: var(--color-background-tertiary, #F1EFE8);
+  --text: var(--color-text-primary, #1F1F1E);
+  --text2: var(--color-text-secondary, #6B6A66);
+  --r: var(--border-radius-md, 6px);
+  --rl: var(--border-radius-lg, 10px);
+}
+.app { display: flex; height: 100vh; min-height: 720px; overflow: hidden; }
+
+/* LOGIN SCREEN (Design Ref: §5.4) */
+.login-screen { display: none; position: fixed; inset: 0; background: var(--bg2); align-items: center; justify-content: center; z-index: 300; }
+.login-screen.open { display: flex; }
+.login-box { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); padding: 32px 28px; width: 320px; }
+.login-title { font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.login-sub { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.login-error { font-size: 13px; color: var(--red); margin-top: 10px; display: none; }
+
+/* USER MANAGEMENT MODAL (Design Ref: §5.4 확장 — 관리자 사용자 등록/관리, module-2) */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); align-items: center; justify-content: center; z-index: 250; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); padding: 24px; width: 480px; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 17px; font-weight: 500; color: var(--text); margin-bottom: 14px; }
+.user-list-table { width: 100%; font-size: 14px; margin-bottom: 16px; border-collapse: collapse; }
+.user-list-table th, .user-list-table td { padding: 6px 8px; border-bottom: 0.5px solid var(--border); text-align: left; }
+.modal-error { font-size: 13px; color: var(--red); margin-top: 8px; display: none; }
+.modal-info { font-size: 13px; color: var(--text2); margin-top: 8px; display: none; }
+
+/* SIDEBAR */
+.sidebar { width: 210px; min-width: 210px; background: var(--bg); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; }
+.sidebar-logo { padding: 18px 18px 14px; border-bottom: 0.5px solid var(--border); }
+.logo-mark { font-size: 20px; font-weight: 500; color: var(--text); }
+.logo-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 10px 7px; overflow-y: auto; }
+.nav-section { margin-bottom: 18px; }
+.nav-label { font-size: 11px; font-weight: 500; color: var(--text2); padding: 0 9px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.08em; }
+.nav-item { display: flex; align-items: center; gap: 9px; padding: 8px 9px; border-radius: var(--r); font-size: 14px; color: var(--text2); cursor: pointer; transition: background 0.12s, color 0.12s; user-select: none; }
+.nav-item:hover { background: var(--bg2); color: var(--text); }
+.nav-item.active { background: var(--blue-light); color: var(--blue-dark); font-weight: 500; }
+.nav-icon { font-size: 15px; width: 15px; text-align: center; }
+.nav-badge { margin-left: auto; font-size: 12px; font-weight: 500; background: var(--amber-light); color: var(--amber); padding: 1px 6px; border-radius: 8px; }
+.sidebar-user { padding: 11px 14px; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 9px; }
+.user-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-light); color: var(--blue-dark); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+.user-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.user-role { font-size: 12px; color: var(--text2); }
+
+/* MAIN */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+.topbar { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0 22px; height: 52px; display: flex; align-items: center; gap: 14px; }
+.topbar-title { font-size: 16px; font-weight: 500; color: var(--text); flex: 1; }
+.btn-primary { background: var(--blue); color: white; border: none; padding: 7px 14px; border-radius: var(--r); font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+.btn-secondary { background: transparent; color: var(--text2); border: 0.5px solid var(--border); padding: 6px 12px; border-radius: var(--r); font-size: 14px; cursor: pointer; }
+.btn-secondary:hover { background: var(--bg2); }
+.btn-danger { background: transparent; color: var(--red); border: 0.5px solid var(--red); padding: 6px 12px; border-radius: var(--r); font-size: 14px; cursor: pointer; }
+.content { flex: 1; overflow-y: auto; padding: 18px 22px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* KPI */
+.kpi-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+.kpi-card { background: var(--bg2); border-radius: var(--r); padding: 14px; }
+.kpi-label { font-size: 13px; color: var(--text2); margin-bottom: 5px; }
+.kpi-value { font-size: 24px; font-weight: 500; color: var(--text); }
+.kpi-change { font-size: 12px; margin-top: 3px; }
+.kpi-change.up { color: var(--teal); }
+.kpi-change.down { color: var(--red); }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); padding: 16px 18px; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 12px; }
+
+.pipeline-stages { display: flex; flex-direction: column; gap: 7px; }
+.stage-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.stage-name { width: 60px; color: var(--text2); text-align: right; flex-shrink: 0; }
+.stage-bar-bg { flex: 1; height: 18px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.stage-bar { height: 100%; border-radius: 3px; }
+.stage-count { width: 24px; color: var(--text2); text-align: right; flex-shrink: 0; }
+.stage-amount { width: 60px; color: var(--text); font-weight: 500; text-align: right; flex-shrink: 0; font-size: 12px; }
+
+.activity-list { display: flex; flex-direction: column; }
+.activity-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+.activity-item:last-child { border-bottom: none; }
+.activity-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.activity-text { font-size: 13px; color: var(--text); line-height: 1.4; }
+.activity-time { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+/* FILTER ROW */
+.filter-row { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+.filter-row input, .filter-row select { font-size: 14px; padding: 6px 10px; border: 0.5px solid var(--border); border-radius: var(--r); background: var(--bg); color: var(--text); }
+.filter-row input { width: 180px; }
+
+/* TABLE */
+.tbl-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl); overflow: hidden; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl th { padding: 9px 12px; text-align: left; background: var(--bg2); color: var(--text2); font-weight: 500; font-size: 12px; border-bottom: 0.5px solid var(--border); white-space: nowrap; }
+.tbl td { padding: 10px 12px; color: var(--text); border-bottom: 0.5px solid var(--border); vertical-align: middle; white-space: nowrap; }
+.tbl td:first-child { white-space: normal; }
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: var(--bg2); }
+.tbl tr { cursor: pointer; }
+
+.stage-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.stage-dot { width: 5px; height: 5px; border-radius: 50%; }
+.s-prospect { background: var(--gray-light); color: var(--gray); }
+.s-contact { background: var(--blue-light); color: var(--blue-dark); }
+.s-proposal { background: var(--amber-light); color: var(--amber); }
+.s-negotiation { background: var(--pink-light); color: var(--pink-dark); }
+.s-won { background: var(--green-light); color: var(--green); }
+.s-lost { background: var(--red-light); color: var(--red); }
+.s-bid { background: #EDE9FB; color: #4A27B5; }
+
+.type-tag { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 12px; font-weight: 500; }
+.type-gov { background: var(--blue-light); color: var(--blue-dark); }
+.type-smb { background: var(--teal-light); color: #085041; }
+
+.priority-bar { display: flex; gap: 2px; }
+.priority-dot { width: 7px; height: 7px; border-radius: 2px; }
+.won-amount { color: var(--teal); font-weight: 500; }
+.overdue-tag { background: var(--red-light); color: var(--red); font-size: 11px; padding: 1px 5px; border-radius: 3px; margin-left: 3px; }
+.empty-cell { color: var(--text2); font-style: italic; font-size: 13px; }
+
+/* ── DRAWER (오른쪽에서 슬라이드) ── */
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; }
+.drawer-overlay.open { display: block; }
+.drawer {
+  display: none;
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 720px; max-width: 92vw; max-height: 88vh;
+  background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--rl);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+  flex-direction: column;
+  z-index: 201;
+  overflow: hidden;
+}
+.drawer.open { display: flex; }
+.drawer-header {
+  padding: 16px 20px; border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+}
+.drawer-header h3 { font-size: 16px; font-weight: 500; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.drawer-close { width: 26px; height: 26px; border-radius: var(--r); background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 16px; }
+.drawer-close:hover { background: var(--bg2); }
+
+/* 탭 */
+.drawer-tabs { display: flex; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+.d-tab { flex: 1; padding: 10px 8px; font-size: 14px; font-weight: 500; color: var(--text2); cursor: pointer; text-align: center; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; }
+.d-tab:hover { color: var(--text); }
+.d-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+.drawer-body { flex: 1; overflow-y: auto; padding: 18px 20px; }
+.drawer-footer { padding: 14px 20px; border-top: 0.5px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; flex-shrink: 0; }
+
+/* TAB 패널 */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* 기본정보 폼 */
+.form-section { margin-bottom: 20px; }
+.form-section-title { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); text-transform: uppercase; letter-spacing: 0.05em; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1/-1; }
+.form-label { font-size: 13px; font-weight: 500; color: var(--text2); }
+.form-label .req { color: var(--red); margin-left: 2px; }
+.form-input { padding: 8px 10px; border: 0.5px solid var(--border); border-radius: var(--r); font-size: 14px; background: var(--bg); color: var(--text); width: 100%; }
+.form-input:focus { outline: none; border-color: var(--blue); }
+select.form-input { cursor: pointer; }
+textarea.form-input { resize: vertical; min-height: 60px; line-height: 1.5; }
+
+/* 단계 진행바 */
+.stage-stepper { display: flex; gap: 0; margin-bottom: 20px; border: 0.5px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.ss-step { flex: 1; padding: 8px 4px; text-align: center; font-size: 12px; color: var(--text2); background: var(--bg2); cursor: pointer; border-right: 0.5px solid var(--border); transition: background 0.15s, color 0.15s; line-height: 1.3; }
+.ss-step:last-child { border-right: none; }
+.ss-step:hover { background: var(--blue-light); color: var(--blue-dark); }
+.ss-step.done { background: var(--teal-light); color: var(--teal); }
+.ss-step.active { background: var(--blue); color: white; font-weight: 500; }
+.ss-step.failed { background: var(--red-light); color: var(--red); }
+
+/* ── 진행과정 탭 ── */
+.process-timeline { display: flex; flex-direction: column; gap: 0; }
+.pt-item { display: flex; gap: 0; position: relative; }
+.pt-left { display: flex; flex-direction: column; align-items: center; width: 36px; flex-shrink: 0; }
+.pt-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--blue); background: var(--bg); flex-shrink: 0; z-index: 1; margin-top: 3px; }
+.pt-dot.filled { background: var(--blue); }
+.pt-dot.teal { border-color: var(--teal); background: var(--teal); }
+.pt-dot.amber { border-color: var(--amber); background: var(--amber); }
+.pt-dot.red { border-color: var(--red); background: var(--red); }
+.pt-dot.pink { border-color: #D4537E; background: #D4537E; }
+.pt-line { width: 2px; flex: 1; background: var(--border); min-height: 16px; }
+.pt-item:last-child .pt-line { display: none; }
+.pt-card { flex: 1; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--r); padding: 12px 14px; margin-bottom: 10px; margin-left: 4px; }
+.pt-card:hover { border-color: var(--blue); }
+.pt-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.pt-stage-tag { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 12px; }
+.pt-date { font-size: 12px; color: var(--text2); margin-left: auto; }
+.pt-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.pt-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.pt-meta { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+.pt-meta-item { font-size: 12px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
+.pt-meta-val { color: var(--text); font-weight: 500; }
+.pt-edit-btn { margin-left: auto; font-size: 12px; color: var(--blue); cursor: pointer; padding: 2px 6px; border-radius: 3px; border: 0.5px solid var(--blue-light); background: var(--blue-light); }
+.pt-edit-btn:hover { background: var(--blue); color: white; }
+.pt-del-btn { font-size: 12px; color: var(--red); cursor: pointer; padding: 2px 6px; border-radius: 3px; border: 0.5px solid var(--red-light); background: var(--red-light); }
+
+/* 진행과정 입력 폼 */
+.process-add-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--r); padding: 14px; margin-bottom: 18px; }
+.process-add-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+.process-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.process-form-grid .full { grid-column: 1/-1; }
+.p-form-group { display: flex; flex-direction: column; gap: 4px; }
+.p-form-label { font-size: 12px; font-weight: 500; color: var(--text2); }
+.p-form-input { padding: 7px 9px; border: 0.5px solid var(--border); border-radius: var(--r); font-size: 13px; background: var(--bg); color: var(--text); width: 100%; }
+.p-form-input:focus { outline: none; border-color: var(--blue); }
+textarea.p-form-input { resize: vertical; min-height: 56px; line-height: 1.5; }
+select.p-form-input { cursor: pointer; }
+.process-form-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; }
+.btn-sm-primary { background: var(--blue); color: white; border: none; padding: 6px 12px; border-radius: var(--r); font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn-sm-secondary { background: transparent; color: var(--text2); border: 0.5px solid var(--border); padding: 5px 10px; border-radius: var(--r); font-size: 13px; cursor: pointer; }
+
+/* 첨부파일 영역 */
+.attach-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.attach-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; background: var(--bg2); border-radius: var(--r); font-size: 13px; }
+.attach-icon { width: 22px; height: 22px; border-radius: 4px; background: var(--blue-light); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--blue-dark); flex-shrink: 0; }
+.attach-name { flex: 1; color: var(--text); }
+.attach-date { color: var(--text2); font-size: 12px; }
+
+/* 다음 액션 */
+.next-action-box { background: var(--amber-light); border: 0.5px solid #FAC775; border-radius: var(--r); padding: 12px 14px; margin-top: 4px; }
+.na-title { font-size: 12px; font-weight: 500; color: var(--amber); margin-bottom: 8px; }
+.na-content { font-size: 14px; color: var(--text); }
+.na-date { font-size: 12px; color: var(--amber); margin-top: 4px; }
+
+/* 편집 인라인 */
+.pt-card.editing { border-color: var(--blue); background: var(--blue-light); }
+.editing-label { font-size: 12px; font-weight: 500; color: var(--blue-dark); margin-bottom: 8px; }
+
+/* 확률 슬라이더 */
+.prob-row { display: flex; align-items: center; gap: 10px; }
+.prob-row input[type=range] { flex: 1; }
+.prob-val { font-size: 14px; font-weight: 500; color: var(--blue); min-width: 36px; }
+
+/* ── 수금 테이블 ── */
+.pay-table { width:100%; border-collapse:collapse; font-size:13px; }
+.pay-table th { padding:7px 10px; background:var(--bg2); color:var(--text2); font-weight:500; border-bottom:0.5px solid var(--border); text-align:left; white-space:nowrap; }
+.pay-table td { padding:6px 8px; border-bottom:0.5px solid var(--border); vertical-align:middle; }
+.pay-table tr:last-child td { border-bottom:none; }
+.pay-input { width:100%; padding:5px 7px; border:0.5px solid var(--border); border-radius:var(--r); font-size:13px; background:var(--bg); color:var(--text); }
+.pay-input:focus { outline:none; border-color:var(--blue); }
+.pay-status { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:500; }
+.pay-s-done { background:var(--green-light); color:var(--green); }
+.pay-s-partial { background:var(--amber-light); color:var(--amber); }
+.pay-s-pending { background:var(--gray-light); color:var(--gray); }
+.pay-summary-item { display:flex; flex-direction:column; gap:2px; }
+.pay-summary-label { font-size:11px; color:var(--text2); }
+.pay-summary-val { font-size:15px; font-weight:500; color:var(--text); }
+.paid-amount { color:var(--teal); font-weight:500; }
+
+/* drag-and-drop rows */
+.drag-handle { cursor: grab; color: var(--text2); font-size: 14px; padding: 0 6px; user-select: none; opacity: 0.4; }
+.drag-handle:hover { opacity: 1; }
+.tbl tr.drag-over td { background: var(--blue-light); }
+.tbl tr.dragging { opacity: 0.4; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── HAMBURGER BUTTON ── */
+.hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--text); font-size: 20px; line-height: 1; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .hamburger { display: flex; align-items: center; }
+
+  .sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh; z-index: 150;
+    transform: translateX(-100%); transition: transform 0.22s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 149;
+    background: rgba(0,0,0,0.35);
+  }
+  .sidebar-backdrop.open { display: block; }
+
+  .app { flex-direction: column; }
+  .main { width: 100%; }
+
+  .topbar { padding: 0 12px; gap: 10px; }
+  .topbar-title { font-size: 15px; }
+
+  .content { padding: 12px; }
+
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .row2 { grid-template-columns: 1fr; }
+
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tbl { min-width: 700px; }
+
+  .filter-row { flex-wrap: wrap; }
+  .filter-row input { width: 100%; }
+
+  .form-grid { grid-template-columns: 1fr; }
+  .form-group.full { grid-column: 1; }
+
+  .process-form-grid { grid-template-columns: 1fr; }
+  .process-form-grid .full { grid-column: 1; }
+
+  .drawer { width: 100% !important; max-width: 100% !important; max-height: 95vh !important;
+    top: auto !important; left: 0 !important; bottom: 0 !important;
+    transform: none !important; border-radius: var(--rl) var(--rl) 0 0 !important; }
+
+  .modal-box { width: 95vw !important; }
+
+  .rep-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-value { font-size: 18px; }
+  .btn-primary span { display: none; }
+}
+</style>
+
+<!-- LOGIN SCREEN (Design Ref: §5.4, §9 Implementation Notes) -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-title">LSD 영업관리 시스템</div>
+    <div class="login-sub">로그인하여 시작하세요</div>
+    <form id="loginForm">
+      <div class="form-group" style="margin-bottom:10px;">
+        <div class="form-label">아이디</div>
+        <input class="form-input" type="text" id="login-email" placeholder="admin" autocomplete="username">
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <div class="form-label">비밀번호</div>
+        <input class="form-input" type="password" id="login-password" placeholder="비밀번호" autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">로그인</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+  </div>
+</div>
+
+<!-- USER MANAGEMENT MODAL (Design Ref: §5.4 확장, module-2) -->
+<div class="modal-overlay" id="userMgmtModal">
+  <div class="modal-box">
+    <div class="modal-title">사용자 관리</div>
+    <table class="user-list-table">
+      <thead><tr><th>이름</th><th>이메일</th><th>역할</th></tr></thead>
+      <tbody id="userListBody"></tbody>
+    </table>
+    <div class="form-section-title">신규 사용자 등록</div>
+    <div class="form-grid">
+      <div class="form-group"><div class="form-label">이름<span class="req">*</span></div><input class="form-input" id="um-name" placeholder="이름"></div>
+      <div class="form-group"><div class="form-label">이메일<span class="req">*</span></div><input class="form-input" id="um-email" type="email" placeholder="email@lsd.co.kr"></div>
+      <div class="form-group"><div class="form-label">초기 비밀번호<span class="req">*</span></div><input class="form-input" id="um-password" type="password" placeholder="비밀번호 (8자 이상)"></div>
+      <div class="form-group"><div class="form-label">역할</div>
+        <select class="form-input" id="um-role"><option value="영업사원">영업사원</option><option value="영업팀장">영업팀장</option></select>
+      </div>
+    </div>
+    <div class="modal-error" id="userMgmtError"></div>
+    <div class="modal-info" id="userMgmtInfo"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+      <button class="btn-secondary" id="userMgmtClose">닫기</button>
+      <button class="btn-primary" id="userMgmtSubmit">등록</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER EDIT MODAL -->
+<div class="modal-overlay" id="customerModal">
+  <div class="modal-box">
+    <div class="modal-title">고객사 수정</div>
+    <div class="form-grid">
+      <div class="form-group full"><div class="form-label">고객사명<span class="req">*</span></div><input class="form-input" id="ce-name"></div>
+      <div class="form-group"><div class="form-label">유형</div>
+        <select class="form-input" id="ce-type"><option>정부기관</option><option>중소기업</option></select>
+      </div>
+      <div class="form-group"><div class="form-label">담당자</div><input class="form-input" id="ce-cname" placeholder="담당자명"></div>
+      <div class="form-group"><div class="form-label">직책</div><input class="form-input" id="ce-cpos" placeholder="직책"></div>
+      <div class="form-group"><div class="form-label">이메일</div><input class="form-input" id="ce-cemail" type="email" placeholder="이메일"></div>
+      <div class="form-group"><div class="form-label">연락처</div><input class="form-input" id="ce-ctel" placeholder="연락처"></div>
+    </div>
+    <div class="modal-error" id="customerError"></div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px;">
+      <button class="btn-secondary" onclick="closeCustomerModal()">닫기</button>
+      <button class="btn-primary" onclick="saveCustomerEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">LSD</div>
+      <div class="logo-sub">영업관리 시스템</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">메인</div>
+        <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-icon">◻</span>대시보드</div>
+        <div class="nav-item" onclick="showPage('sites',this)"><span class="nav-icon">◈</span>영업 파이프라인<span class="nav-badge" id="siteBadge">9</span></div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">분석</div>
+        <div class="nav-item" onclick="showPage('report',this)"><span class="nav-icon">◐</span>매출 분석</div>
+      </div>
+      <div class="nav-section" id="navAdminSection" style="display:none;">
+        <div class="nav-label">관리</div>
+        <div class="nav-item" id="navUserMgmt"><span class="nav-icon">◎</span>사용자 관리</div>
+      </div>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sidebarUserAvatar">--</div>
+      <div style="flex:1;min-width:0;"><div class="user-name" id="sidebarUserName">-</div><div class="user-role" id="sidebarUserRole">-</div></div>
+      <button class="drawer-close" id="logoutBtn" title="로그아웃" style="flex-shrink:0;">↪</button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="pageTitle">대시보드</span>
+      <div style="display:none;gap:8px;" id="topbarActions">
+        <button class="btn-secondary" onclick="exportData()">↓ 내보내기</button>
+        <button class="btn-primary" onclick="openNewDrawer()">+ 신규 등록</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px;">
+          <span style="font-size:13px;color:var(--text2)">기준 년도</span>
+          <select class="form-input" id="dashYearFilter" onchange="renderDashboard()" style="width:100px;padding:5px 8px;font-size:13px;"></select>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(6,1fr)">
+          <div class="kpi-card"><div class="kpi-label">올해 파이프라인</div><div class="kpi-value" id="kpi-goal">-</div><div class="kpi-change" id="kpi-goal-sub" style="color:var(--text2)"></div></div>
+          <div class="kpi-card"><div class="kpi-label">올해 달성률</div><div class="kpi-value won-amount" id="kpi-year-rate">-%</div><div class="kpi-change" id="kpi-year-rate-sub" style="color:var(--text2)"></div></div>
+          <div class="kpi-card"><div class="kpi-label">진행중 영업건</div><div class="kpi-value" id="kpi-active">9건</div><div class="kpi-change up">▲ 신규 3건 추가</div></div>
+          <div class="kpi-card"><div class="kpi-label">이번달 계약완료</div><div class="kpi-value won-amount" id="kpi-won">1.8억</div><div class="kpi-change up">▲ 전월 대비 +0.4억</div></div>
+          <div class="kpi-card"><div class="kpi-label">기대 수주금액</div><div class="kpi-value" id="kpi-expected">-</div><div class="kpi-change down">▼ 협상 2건 지연</div></div>
+          <div class="kpi-card"><div class="kpi-label">이번달 목표달성</div><div class="kpi-value" id="kpi-rate">78%</div><div class="kpi-change up">▲ 전월 대비 +12%p</div></div>
+        </div>
+        <div class="row2">
+          <div class="card"><div class="card-title">영업 단계별 현황</div><div class="pipeline-stages" id="pipelineChart"></div></div>
+          <div class="card"><div class="card-title">최근 활동</div><div class="activity-list" id="activityFeed"></div></div>
+        </div>
+        <div class="card"><div class="card-title">주요 영업 현황 (진행중)</div>
+          <table class="tbl"><thead><tr><th>프로젝트명</th><th>유형</th><th>단계</th><th>금액</th><th>담당자</th><th>마감예정</th></tr></thead>
+          <tbody id="dashTopSites"></tbody></table>
+        </div>
+      </div>
+
+      <!-- SITES -->
+      <div class="page" id="page-sites">
+        <div class="filter-row">
+          <select id="yearFilter" onchange="filterSites()" style="font-size:14px;padding:6px 10px;border:0.5px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);"></select>
+          <input type="text" placeholder="프로젝트명 / 고객사 검색..." id="searchInput" oninput="filterSites()">
+          <select id="stageFilter" onchange="filterSites()">
+            <option value="">전체 단계</option>
+            <option>발굴</option><option>접촉</option><option>제안</option>
+            <option>협상</option><option>입찰진행</option><option>계약완료</option><option>실패</option>
+          </select>
+          <select id="typeFilter" onchange="filterSites()">
+            <option value="">전체 유형</option><option>정부기관</option><option>중소기업</option>
+          </select>
+          <select id="sortFilter" onchange="filterSites()">
+            <option value="recent">최근 등록순</option>
+            <option value="amount">금액 높은순</option>
+            <option value="deadline">마감일 빠른순</option>
+            <option value="manual">직접 정렬</option>
+          </select>
+          <span style="margin-left:auto;font-size: 13px;color:var(--text2)" id="siteCount"></span>
+        </div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th id="dragHandleTh" style="width:28px;"></th><th>프로젝트명</th><th>고객사</th><th>유형</th><th>단계</th><th>제품/서비스</th><th>금액</th><th>원가</th><th>예상수익</th><th>결제</th><th>담당자</th><th>마감예정</th><th>우선순위</th></tr></thead>
+            <tbody id="sitesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <!-- REPORT -->
+      <div class="page" id="page-report">
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px;">
+          <span style="font-size:13px;color:var(--text2)">기준 년도</span>
+          <select class="form-input" id="reportYearFilter" onchange="renderReport()" style="width:100px;padding:5px 8px;font-size:13px;"></select>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi-card"><div class="kpi-label">영업 파이프라인 합계</div><div class="kpi-value" id="rep-total">-</div></div>
+          <div class="kpi-card"><div class="kpi-label">YTD 계약완료</div><div class="kpi-value won-amount" id="rep-ytd">-</div></div>
+          <div class="kpi-card"><div class="kpi-label">계약 달성률</div><div class="kpi-value" id="rep-rate">-</div></div>
+          <div class="kpi-card"><div class="kpi-label">평균 영업 사이클</div><div class="kpi-value" id="rep-cycle">-</div></div>
+        </div>
+        <div class="row2">
+          <div class="card"><div class="card-title">월별 수주 현황 (억원)</div><div style="display:flex;align-items:flex-end;gap:5px;height:120px;margin-top:4px;" id="monthlyChart"></div></div>
+          <div class="card">
+            <div class="card-title">유형별 수주 비율</div>
+            <div style="display:flex;align-items:center;justify-content:center;height:120px;gap:24px;">
+              <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#E6F1FB" stroke-width="16"/>
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#185FA5" stroke-width="16" stroke-dasharray="143 96" stroke-dashoffset="20" stroke-linecap="round"/>
+                <circle cx="50" cy="50" r="38" fill="none" stroke="#1D9E75" stroke-width="16" stroke-dasharray="96 143" stroke-dashoffset="-123" stroke-linecap="round"/>
+                <text x="50" y="46" text-anchor="middle" font-size="11" font-weight="500" fill="#185FA5">60%</text>
+                <text x="50" y="58" text-anchor="middle" font-size="9" fill="var(--color-text-secondary)">정부기관</text>
+              </svg>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:6px;font-size: 13px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:#185FA5;flex-shrink:0"></div>정부기관 60%</div>
+                <div style="display:flex;align-items:center;gap:6px;font-size: 13px;color:var(--text2)"><div style="width:8px;height:8px;border-radius:2px;background:#1D9E75;flex-shrink:0"></div>중소기업 40%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="card-title">제품/서비스별 수주 현황</div><div id="productReport"></div></div>
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ DRAWER ══ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <h3 id="drawerTitle">신규 영업 등록</h3>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <span id="drawerStageBadge"></span>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+  </div>
+  <div class="drawer-tabs">
+    <div class="d-tab active" onclick="switchTab('basic',this)">기본 정보</div>
+    <div class="d-tab" onclick="switchTab('process',this)">진행 과정</div>
+    <div class="d-tab" onclick="switchTab('payment',this)">수금</div>
+    <div class="d-tab" onclick="switchTab('files',this)">첨부 파일</div>
+    <div class="d-tab" onclick="switchTab('next',this)">다음 액션</div>
+  </div>
+  <div class="drawer-body">
+
+    <!-- 기본 정보 탭 -->
+    <div class="tab-panel active" id="tab-basic">
+      <div class="form-section">
+        <div class="form-section-title">영업 단계</div>
+        <div class="stage-stepper" id="stageStepper"></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">기본 정보</div>
+        <div class="form-grid">
+          <div class="form-group"><div class="form-label">프로젝트명<span class="req">*</span></div><input class="form-input" id="f-site" placeholder="프로젝트명 입력"></div>
+          <div class="form-group"><div class="form-label">고객사명<span class="req">*</span></div><input class="form-input" id="f-customer" placeholder="고객사명"></div>
+          <div class="form-group"><div class="form-label">고객 유형</div>
+            <select class="form-input" id="f-type"><option value="정부기관">정부기관</option><option value="중소기업">중소기업</option></select>
+          </div>
+          <div class="form-group"><div class="form-label">제품/서비스</div>
+            <input class="form-input" id="f-product" placeholder="제품/서비스명 입력">
+          </div>
+          <div class="form-group"><div class="form-label">예상 금액 (만원)</div><input class="form-input" id="f-amount" type="number" placeholder="0" oninput="calcProfit()"></div>
+          <div class="form-group"><div class="form-label">예상 원가 (만원)</div><input class="form-input" id="f-cost" type="number" placeholder="0" oninput="calcProfit()"></div>
+          <div class="form-group"><div class="form-label">수익 (만원)</div><input class="form-input" id="f-profit" type="number" placeholder="자동 계산" readonly style="background:var(--bg2);color:var(--teal);font-weight:500;cursor:default;"></div>
+          <div class="form-group"><div class="form-label">담당자</div><input class="form-input" id="f-manager" placeholder="담당자명"></div>
+          <div class="form-group"><div class="form-label">영업 시작일<span class="req">*</span></div><input class="form-input" id="f-start-date" type="date"></div>
+          <div class="form-group"><div class="form-label">마감 예정일</div><input class="form-input" id="f-deadline" type="date"></div>
+          <div class="form-group"><div class="form-label">우선순위</div>
+            <select class="form-input" id="f-priority"><option value="3">높음</option><option value="2" selected>보통</option><option value="1">낮음</option></select>
+          </div>
+          <div class="form-group full">
+            <div class="form-label">수주 성공 확률</div>
+            <div class="prob-row"><input type="range" min="0" max="100" step="5" id="f-prob" oninput="document.getElementById('probVal').textContent=this.value+'%'"><span class="prob-val" id="probVal">50%</span></div>
+          </div>
+          <div class="form-group full"><div class="form-label">비고</div><textarea class="form-input" id="f-note" placeholder="추가 메모..."></textarea></div>
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">고객사 연락처</div>
+        <div class="form-grid">
+          <div class="form-group"><div class="form-label">담당자명</div><input class="form-input" id="f-cname" placeholder="고객사 담당자"></div>
+          <div class="form-group"><div class="form-label">직책</div><input class="form-input" id="f-cpos" placeholder="직책/직급"></div>
+          <div class="form-group"><div class="form-label">이메일</div><input class="form-input" id="f-cemail" type="email" placeholder="email@example.com"></div>
+          <div class="form-group"><div class="form-label">전화번호</div><input class="form-input" id="f-ctel" placeholder="010-0000-0000"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 진행 과정 탭 -->
+    <div class="tab-panel" id="tab-process">
+      <!-- 입력 폼 -->
+      <div class="process-add-box" id="processAddBox">
+        <div class="process-add-title">
+          <span id="processFormTitle">+ 진행 내용 추가</span>
+          <button class="btn-sm-secondary" onclick="toggleProcessForm()" id="processFormToggleBtn">접기</button>
+        </div>
+        <div id="processFormBody">
+          <div class="process-form-grid">
+            <div class="p-form-group">
+              <div class="p-form-label">날짜<span class="req" style="color:var(--red)">*</span></div>
+              <input class="p-form-input" type="date" id="pf-date">
+            </div>
+            <div class="p-form-group">
+              <div class="p-form-label">활동 유형</div>
+              <select class="p-form-input" id="pf-type">
+                <option value="미팅">미팅</option>
+                <option value="전화">전화</option>
+                <option value="이메일">이메일</option>
+                <option value="제안서">제안서 제출</option>
+                <option value="견적">견적서 제출</option>
+                <option value="데모">데모/시연</option>
+                <option value="계약">계약 서명</option>
+                <option value="방문">현장 방문</option>
+                <option value="기타">기타</option>
+              </select>
+            </div>
+            <div class="p-form-group full">
+              <div class="p-form-label">제목<span class="req" style="color:var(--red)">*</span></div>
+              <input class="p-form-input" id="pf-title" placeholder="활동 제목 (예: 1차 제안 발표 완료)">
+            </div>
+            <div class="p-form-group full">
+              <div class="p-form-label">내용</div>
+              <textarea class="p-form-input" id="pf-desc" placeholder="상세 내용, 고객 반응, 논의 사항 등..."></textarea>
+            </div>
+            <div class="p-form-group">
+              <div class="p-form-label">단계 변경</div>
+              <select class="p-form-input" id="pf-stage">
+                <option value="">— 단계 유지 —</option>
+                <option>발굴</option><option>접촉</option><option>제안</option>
+                <option>협상</option><option>계약완료</option><option>실패</option>
+              </select>
+            </div>
+            <div class="p-form-group">
+              <div class="p-form-label">참석자</div>
+              <input class="p-form-input" id="pf-attendee" placeholder="참석자 이름 (쉼표 구분)">
+            </div>
+          </div>
+          <div class="process-form-actions">
+            <button class="btn-sm-secondary" onclick="clearProcessForm()">초기화</button>
+            <button class="btn-sm-primary" onclick="saveProcessEntry()">저장</button>
+          </div>
+        </div>
+      </div>
+      <!-- 타임라인 -->
+      <div class="process-timeline" id="processTimeline"></div>
+    </div>
+
+    <!-- 첨부 파일 탭 -->
+    <div class="tab-panel" id="tab-files">
+      <div style="margin-bottom:14px;">
+        <button class="btn-primary" onclick="addDemoFile()" style="font-size: 14px;padding:7px 14px;">+ 파일 첨부 (시뮬레이션)</button>
+      </div>
+      <div class="attach-list" id="attachList"></div>
+      <div id="noFiles" style="font-size: 14px;color:var(--text2);margin-top:12px;display:none">첨부된 파일이 없습니다.</div>
+    </div>
+
+    <!-- 다음 액션 탭 -->
+    <div class="tab-panel" id="tab-payment">
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="font-size:13px;color:var(--text2);">수금 단계를 등록하고 실제 입금 내역을 관리합니다.</div>
+        <button class="btn-sm-primary" onclick="addPaymentStage()">+ 단계 추가</button>
+      </div>
+      <div id="paymentSummary" style="display:none;background:var(--bg2);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;display:flex;gap:24px;font-size:13px;"></div>
+      <div id="paymentList"></div>
+    </div>
+
+    <div class="tab-panel" id="tab-next">
+      <div class="form-section">
+        <div class="form-section-title">다음 액션 등록</div>
+        <div class="form-grid" style="gap:10px;">
+          <div class="form-group"><div class="form-label">액션 유형</div>
+            <select class="form-input" id="na-type">
+              <option>미팅 예약</option><option>제안서 제출</option><option>견적서 전달</option>
+              <option>계약서 작성</option><option>전화 연락</option><option>이메일 발송</option><option>현장 방문</option>
+            </select>
+          </div>
+          <div class="form-group"><div class="form-label">예정일</div><input class="form-input" id="na-date" type="date"></div>
+          <div class="form-group full"><div class="form-label">상세 내용</div><textarea class="form-input" id="na-desc" placeholder="다음 액션 내용 입력..."></textarea></div>
+          <div class="form-group"><div class="form-label">담당자</div><input class="form-input" id="na-person" placeholder="담당자명"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+          <button class="btn-primary" onclick="saveNextAction()" style="font-size: 14px;">액션 저장</button>
+        </div>
+      </div>
+      <div style="margin-top:4px;" id="nextActionDisplay"></div>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <button class="btn-danger" id="deleteBtn" onclick="deleteSite()" style="margin-right:auto;display:none">삭제</button>
+    <button class="btn-secondary" onclick="closeDrawer()">닫기</button>
+    <button class="btn-primary" onclick="saveSite()">저장</button>
+  </div>
+</div>
+
+<!-- Design Ref: §9, §10 Implementation Guide — app.js 모듈로 이전 (module-3, module-4) -->
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('open');
+}
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.nav-item')) closeSidebar();
+});
+</script>
+<script type="module" src="js/app.js"></script>
+
+<!-- Design Ref: §9 Implementation Notes — 인증 모듈 (module-2) -->
+<script type="module">
+  import { initAuth } from './js/auth.js';
+  initAuth();
+</script>
